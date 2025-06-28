@@ -1,0 +1,26 @@
+.statusMessage {
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  margin: 16px 0;
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.loading {
+  color: #3178c6;
+  background-color: #e6f0ff;
+  border: 1px solid #3178c6;
+}
+
+.error {
+  color: #b00020;
+  background-color: #fdecea;
+  border: 1px solid #b00020;
+}
+
+.empty {
+  color: #555;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+}
