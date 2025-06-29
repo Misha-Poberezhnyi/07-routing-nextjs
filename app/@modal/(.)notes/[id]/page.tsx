@@ -1,55 +1,24 @@
-'use client';
-import { useParams, useRouter } from 'next/navigation';
-import Modal from '@/components/Modal/Modal';
+import { HydrationBoundary, QueryClient, dehydrate } from '@tanstack/react-query';
 import { fetchNoteById } from '@/lib/api';
-import { useQuery } from '@tanstack/react-query';
-import css from './NotePreview.module.css';
-import QueryStatus from '@/components/QueryStatus/QueryStatus'; 
+import NotePreviewClient from './NotePreview.client';
 
-export default function NotePreviewClient() {
-  const router = useRouter();
-  const id = Number(useParams<{ id: string }>().id); 
-  const closeModal = () => {
-    router.back();
-  };
+interface NotePageProps {
+  params: Promise<{ id: string }>;
+}
 
-  const {
-    data: note,
-    isLoading,
-    error,
-    isSuccess,
-    isError,
-  } = useQuery({
+export default async function NotePage(props: NotePageProps) {
+  const resolvedParams = await props.params;
+  const id = Number(resolvedParams.id);
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
     queryKey: ['note', id],
     queryFn: () => fetchNoteById(id),
-    refetchOnMount: false,
   });
 
   return (
-    <Modal onClose={closeModal}>
-      <QueryStatus
-        isLoading={isLoading}
-        isError={isError}
-        error={error}
-        isEmpty={!note && !isLoading} 
-        emptyMessage="Note not found"
-      />
-
-      {note && isSuccess && (
-        <div className={css.container}>
-          <div className={css.item}>
-            <div className={css.header}>
-              <h2>{note.title}</h2>
-              <button className={css.backBtn} onClick={closeModal}>Back</button>
-            </div>
-            <p className={css.content}>{note.content}</p>
-            <p className={css.tag}><strong>Tag:</strong> {note.tag}</p>
-            <p className={css.date}>
-              {note.updatedAt ? `Updated at: ${note.updatedAt}` : `Created at: ${note.createdAt}`}
-            </p>
-          </div>
-        </div>
-      )}
-    </Modal>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <NotePreviewClient id={id} />
+    </HydrationBoundary>
   );
 }
